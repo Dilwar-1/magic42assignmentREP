@@ -1,59 +1,132 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Queued Weather Demo (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is a Laravel app built for a technical interview assignment to demonstrate **agentic coding practices** and **background job processing** using **Laravel Queues**.
 
-## About Laravel
+Users submit a city/location, the app stores the request, then a queued job fetches (or simulates) weather data asynchronously and persists the result.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## What this app demonstrates
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Background jobs**: weather fetching and JSON formatting happen in a queued job, not in the HTTP request.
+- **Status tracking**: `pending → processing → completed/failed` stored in the database.
+- **Persistence**: raw API JSON + formatted output are stored for review.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Architecture (high-level)
 
-## Learning Laravel
+- **Request flow**:
+  - `POST /weather` creates a `weather_requests` row (`status=pending`) and dispatches a job.
+  - A queue worker processes `FetchAndProcessWeatherJob`, updates the row, and marks completion/failure.
+- **Queue driver**: `database` (so jobs are visible in the `jobs` table)
+- **Database**: SQLite (simple local setup)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Key files
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Routes**: `routes/web.php`
+- **Controller**: `app/Http/Controllers/WeatherController.php`
+- **Job**: `app/Jobs/FetchAndProcessWeatherJob.php`
+- **Model**: `app/Models/WeatherRequest.php`
+- **Migration**: `database/migrations/2025_01_18_142503_create_weather_requests_table.php`
+- **Views**:
+  - `resources/views/weather/index.blade.php`
+  - `resources/views/weather/show.blade.php`
 
-## Laravel Sponsors
+## AI tool + agentic workflow (assignment requirement)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **AI tool used**: Cursor (agentic coding in-repo)
+- **How it was used**:
+  - Planned the queue-centric architecture first (job responsibilities, status tracking, schema).
+  - Generated code incrementally (migration → model → controller/routes → job → views).
+  - Debugged environment issues (Windows permissions) based on runtime errors, not guesswork.
+- **Decision-making**: I stayed in control of trade-offs (database queue vs redis; simulated mode vs requiring API keys; minimal service abstraction for a small demo).
 
-### Premium Partners
+## Running the app locally
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Prerequisites
 
-## Contributing
+- PHP 8.2+
+- Composer
+- (Optional) Node + npm if you want to run Vite, but the app also has a CSS fallback so UI still works without a frontend build.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Setup (all platforms)
 
-## Code of Conduct
+```powershell
+composer install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Start the app (two terminals)
 
-## Security Vulnerabilities
+Terminal 1 (web server):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```powershell
+php artisan serve
+```
 
-## License
+Terminal 2 (queue worker):
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```powershell
+php artisan queue:work --tries=1 --sleep=1
+```
+
+Then open:
+
+- `http://127.0.0.1:8000/weather`
+
+## Weather API behavior
+
+This project supports two modes:
+
+- **Real API mode** (OpenWeatherMap): set an API key in `.env`:
+  - `WEATHER_API_KEY=your_key_here`
+- **Simulated mode** (default): if `WEATHER_API_KEY` is not set, the job generates a small simulated response and still stores it in the database. This keeps the demo runnable without external setup.
+
+## Testing the queued workflow (manual)
+
+- Visit `http://127.0.0.1:8000/weather`
+- Enter a city (e.g. "London") and submit
+- You’ll be redirected to a details page:
+  - Status should move **pending → processing → completed**
+  - On completion you’ll see a summary + raw JSON stored by the job
+
+## Windows notes (important)
+
+On Windows, you may hit permissions/attributes issues that cause Laravel/SQLite errors.
+
+### Fix 1: `bootstrap/cache` must be writable
+
+Run in PowerShell (from the project root):
+
+```powershell
+attrib -R bootstrap\cache /S /D
+icacls bootstrap\cache /grant Everyone:F /T
+```
+
+### Fix 2: SQLite “disk I/O error” (folder marked read-only)
+
+If you see errors like `SQLSTATE[HY000]: General error: 10 disk I/O error`, ensure the `database` folder is not read-only and is writable:
+
+```powershell
+attrib -R database /S /D
+icacls database /grant Everyone:F /T
+```
+
+## Interview discussion points
+
+- **Why a queued job here**: external API calls and processing shouldn’t block the HTTP request.
+- **Why database queue**: simplest to demonstrate jobs + inspect the `jobs` table without extra infrastructure.
+- **Failure handling**: job catches exceptions and persists `error_message` with `status=failed`.
+- **Prompting techniques that worked**:
+  - Ask for a plan + trade-offs before writing code
+  - Request small incremental changes, then run and verify
+  - Use runtime errors as feedback loops and document fixes
+
+## Repository hygiene (what is NOT committed)
+
+This repo intentionally does **not** include:
+- `.env` (secrets / local config)
+- `vendor/`, `node_modules/`
+- `database/database.sqlite` (local data)
+- runtime files under `storage/`
+
+Reviewers can recreate everything with the setup steps above.
