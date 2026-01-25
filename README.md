@@ -71,6 +71,8 @@ Terminal 2 (queue worker):
 php artisan queue:work --tries=1 --sleep=1
 ```
 
+Leave the queue worker running — otherwise requests will remain **pending** (jobs won’t be processed).
+
 Then open:
 
 - `http://127.0.0.1:8000/weather`
