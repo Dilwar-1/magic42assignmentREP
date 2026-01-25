@@ -14,6 +14,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        // Our home route redirects to the weather page.
+        $response->assertRedirect('/weather');
     }
 }

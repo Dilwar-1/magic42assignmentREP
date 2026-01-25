@@ -73,6 +73,12 @@ Then open:
 
 - `http://127.0.0.1:8000/weather`
 
+## Running tests
+
+```powershell
+php artisan test
+```
+
 ## Weather API behavior
 
 This project supports two modes:
