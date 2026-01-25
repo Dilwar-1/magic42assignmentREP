@@ -205,8 +205,7 @@
             </div>
 
             <div class="footer">
-                <div><strong>Tip for interview:</strong> this page is where HTTP requests
-                    trigger queued jobs, which is central to the brief.</div>
+                <div><strong>Dilwar Loshkor Weather Application</strong></div>
             </div>
         </div>
 
@@ -217,7 +216,6 @@
                 <p class="side-text">
                     Requests are stored in the <code>weather_requests</code> table,
                     then processed by a queued <code>FetchAndProcessWeatherJob</code>.
-                    You can walk through this flow in your interview.
                 </p>
                 <div class="pill-row">
                     <span class="pill pill-strong">Queued Job</span>
