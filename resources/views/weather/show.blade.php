@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+    @php use App\Support\WeatherRequestPresenter as WeatherView; @endphp
+
     <div style="margin-bottom:1.5rem;">
         <a href="{{ route('weather.index') }}" style="font-size:0.85rem; color:#9ca3af; text-decoration:none;">
             ← Back to all requests
@@ -11,15 +13,7 @@
         Weather request for <span style="color:#bfdbfe;">{{ $weatherRequest->location }}</span>
     </h2>
 
-    @php
-        $status = $weatherRequest->status;
-        $statusColor = [
-            'pending' => '#f97316',
-            'processing' => '#eab308',
-            'completed' => '#22c55e',
-            'failed' => '#ef4444',
-        ][$status] ?? '#9ca3af';
-    @endphp
+    @php $status = $weatherRequest->status; @endphp
 
     <p style="margin-bottom:0.8rem; font-size:0.9rem; color:#9ca3af;">
         Current status:
@@ -28,7 +22,7 @@
                 width:0.5rem;
                 height:0.5rem;
                 border-radius:999px;
-                background:{{ $statusColor }};
+                background:{{ WeatherView::statusColor($status) }};
             "></span>
             <span style="text-transform:capitalize; color:#e5e7eb;">
                 {{ $status }}
@@ -39,7 +33,7 @@
         </span>
     </p>
 
-    @if ($weatherRequest->status === 'pending' || $weatherRequest->status === 'processing')
+    @if (WeatherView::isInProgress($weatherRequest))
         <div style="
             padding:0.8rem 0.9rem;
             border-radius:0.8rem;
@@ -55,7 +49,7 @@
         </div>
     @endif
 
-    @if ($weatherRequest->status === 'failed')
+    @if (WeatherView::isFailed($weatherRequest))
         <div style="
             padding:0.8rem 0.9rem;
             border-radius:0.8rem;
@@ -71,7 +65,7 @@
         </div>
     @endif
 
-    @if ($weatherRequest->status === 'completed')
+    @if (WeatherView::isCompleted($weatherRequest))
         <div style="display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:1rem;">
             <div>
                 <h3 style="font-size:0.95rem; font-weight:500; margin-bottom:0.4rem;">
@@ -84,20 +78,15 @@
                     background:rgba(15,23,42,0.8);
                     font-size:0.95rem;
                 ">
-                    @php
-                        $formatted = null;
-                        if ($weatherRequest->formatted_data) {
-                            $formatted = json_decode($weatherRequest->formatted_data, true);
-                        }
-                    @endphp
+                    @php $summary = WeatherView::summary($weatherRequest); @endphp
 
-                    @if (is_array($formatted) && isset($formatted['summary']))
+                    @if ($summary)
                         <p style="margin:0 0 0.4rem 0;">
-                            {{ $formatted['summary'] }}
+                            {{ $summary }}
                         </p>
                         <p style="margin:0; font-size:0.85rem; color:#9ca3af;">
-                            Temperature: <strong>{{ $formatted['temperature'] ?? $weatherRequest->temperature ?? 'n/a' }}</strong><br>
-                            Condition: <strong>{{ $formatted['condition'] ?? $weatherRequest->condition ?? 'n/a' }}</strong>
+                            Temperature: <strong>{{ WeatherView::temperatureForDisplay($weatherRequest) }}</strong><br>
+                            Condition: <strong>{{ WeatherView::conditionForDisplay($weatherRequest) }}</strong>
                         </p>
                     @else
                         <p style="margin:0;">

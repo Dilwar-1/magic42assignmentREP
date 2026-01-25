@@ -10,11 +10,6 @@ use Illuminate\View\View;
 
 /**
  * WeatherController
- *
- * Simple explanation:
- * - This is the \"traffic controller\" for weather features.
- * - It receives web requests, talks to the model and job,
- *   and returns views (HTML pages).
  */
 class WeatherController extends Controller
 {
@@ -43,21 +38,17 @@ class WeatherController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Basic validation: require a non-empty string for location
         $validated = $request->validate([
             'location' => ['required', 'string', 'max:255'],
         ]);
 
-        // Create a new WeatherRequest row in the database
         $weatherRequest = WeatherRequest::create([
             'location' => $validated['location'],
             'status' => 'pending',
         ]);
 
-        // Dispatch the background job
         FetchAndProcessWeatherJob::dispatch($weatherRequest);
 
-        // Redirect to the \"show\" page for this specific request
         return redirect()
             ->route('weather.show', $weatherRequest)
             ->with('status', 'Weather request queued for processing.');

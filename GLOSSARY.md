@@ -52,6 +52,33 @@ This document explains key terms as we encounter them. I'll add to it as we go!
 - **What it does**: Continuously checks for jobs and processes them
 - **Command**: `php artisan queue:work`
 
+### Queue Driver (Database Queue)
+- **What it is**: The storage backend Laravel uses to hold queued jobs until a worker processes them.
+- **In our project**: `QUEUE_CONNECTION=database`, so jobs are stored in the `jobs` table.
+- **Why it’s good for a demo**: easy to run locally and you can inspect jobs in the DB.
+
+### Status Tracking (pending → processing → completed/failed)
+- **What it is**: A simple state machine stored in the database so you can see what stage a request is in.
+- **In our project**: `WeatherRequest.status` changes as the job runs.
+
+### Presenter / Helper (Separation of Concerns)
+- **What it is**: A small class used by the view layer to keep templates focused on rendering, not decision logic.
+- **In our project**: `app/Support/WeatherRequestPresenter.php` contains helpers like:
+  - status grouping (pending/processing/etc.)
+  - status color mapping
+  - decoding stored formatted JSON for display
+
+### Environment Variables (.env)
+- **What it is**: Configuration values loaded at runtime (not committed to git).
+- **In our project**:
+  - `QUEUE_CONNECTION=database` controls the queue driver
+  - `DB_CONNECTION=sqlite` controls the database
+
+### WEATHER_API_KEY (Real API vs Simulated Mode)
+- **What it is**: An optional API key used to call the real OpenWeatherMap API.
+- **If set**: the job makes a real HTTP request to OpenWeatherMap and stores the response.
+- **If not set**: the job uses a small simulated payload (still stored in the database) so the app runs without external setup.
+
 ## Laravel File Structure
 
 ```
@@ -60,6 +87,7 @@ phpapp/
 │   ├── Http/Controllers/         # Controllers (handle requests)
 │   ├── Jobs/                     # Queue jobs (background tasks)
 │   └── Models/                   # Models (database tables)
+│   └── Support/                  # Presenter/helpers for views
 │
 ├── database/
 │   └── migrations/               # Database table definitions

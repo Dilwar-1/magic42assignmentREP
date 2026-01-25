@@ -9,6 +9,8 @@ Users submit a city/location, the app stores the request, then a queued job fetc
 - **Background jobs**: weather fetching and JSON formatting happen in a queued job, not in the HTTP request.
 - **Status tracking**: `pending → processing → completed/failed` stored in the database.
 - **Persistence**: raw API JSON + formatted output are stored for review.
+- **Separation of concerns**: view decision logic is centralized in a small presenter/helper used by Blade templates.
+- **Automated tests**: includes a job test covering the simulated (no API key) path.
 
 ## Architecture (high-level)
 

@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+    @php use App\Support\WeatherRequestPresenter as WeatherView; @endphp
+
     <form action="{{ route('weather.store') }}" method="POST" style="margin-bottom: 1.75rem;">
         @csrf
         <label for="location" style="display:block; font-size:0.9rem; font-weight:500; margin-bottom:0.35rem;">
@@ -74,15 +76,6 @@
                                     {{ $request->location }}
                                 </td>
                                 <td style="padding:0.55rem 0.9rem;">
-                                    @php
-                                        $status = $request->status;
-                                        $statusColor = [
-                                            'pending' => '#f97316',
-                                            'processing' => '#eab308',
-                                            'completed' => '#22c55e',
-                                            'failed' => '#ef4444',
-                                        ][$status] ?? '#9ca3af';
-                                    @endphp
                                     <span style="
                                         display:inline-flex;
                                         align-items:center;
@@ -93,10 +86,10 @@
                                             width:0.45rem;
                                             height:0.45rem;
                                             border-radius:999px;
-                                            background:{{ $statusColor }};
+                                            background:{{ WeatherView::statusColor($request->status) }};
                                         "></span>
                                         <span style="text-transform:capitalize;">
-                                            {{ $status }}
+                                            {{ $request->status }}
                                         </span>
                                     </span>
                                 </td>

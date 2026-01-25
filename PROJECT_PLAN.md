@@ -18,9 +18,9 @@ This project is perfect for demonstrating background job processing because:
 
 ### Core Features
 1. **Weather Data Input**
-   - User can enter a city/location name
-   - OR upload a JSON file with location data
-   - OR fetch weather for multiple cities at once
+   - MVP: user can enter a single city/location name via a web form
+   - Optional enhancement: upload a JSON file with location data (bulk requests)
+   - Optional enhancement: fetch weather for multiple cities at once (queue multiple jobs)
 
 2. **Background Processing** (Queue Job)
    - Fetch weather data from API (OpenWeatherMap or similar)
@@ -45,7 +45,7 @@ This project is perfect for demonstrating background job processing because:
 - **Framework**: Laravel 12 (already installed)
 - **Queue Driver**: Database (already configured)
 - **Database**: SQLite (simple, no setup needed)
-- **API**: OpenWeatherMap (free tier available) or weather API of choice
+- **API**: OpenWeatherMap (free tier available) or weather API of choice OR Simulated Data.
 
 ### File Structure
 ```
@@ -61,9 +61,10 @@ database/migrations/
 └── xxxx_create_weather_requests_table.php  # Stores weather data
 
 resources/views/
-├── weather.blade.php               # Input form
-├── results.blade.php              # View formatted weather
-└── layouts/app.blade.php          # Base layout
+├── layouts/app.blade.php          # Base layout
+└── weather/
+    ├── index.blade.php            # Input form + recent requests
+    └── show.blade.php             # Single request status/result
 
 routes/
 └── web.php                        # Define routes
@@ -184,22 +185,21 @@ routes/
 
 ## ✅ Success Criteria
 
-1. ✅ Users can submit a location/city name
-2. ✅ Weather data is fetched in background queue
-3. ✅ JSON response is processed and formatted
-4. ✅ Formatted weather is stored and displayed
-5. ✅ Users can view processing status
-6. ✅ Error handling works correctly
-7. ✅ Code is clean and well-structured
-8. ✅ README documents the process
+1. Users can submit a location/city name
+2. Weather data is fetched in background queue
+3. JSON response is processed and formatted
+4. Formatted weather is stored and displayed
+5. Users can view processing status
+6. Error handling works correctly
+7. Code is clean and well-structured
+8. README documents the process
 
 ## 🚀 Next Steps
 
 1. Review and approve this plan
 2. Choose weather API (or start with mock data)
-3. Start with Phase 1: Database Setup
-4. Build incrementally, testing at each step
-5. Document decisions as we go
+3. Build incrementally, testing at each step
+4. Document decisions and discoveries as you go
 
 ---
 
