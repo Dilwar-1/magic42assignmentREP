@@ -1,8 +1,6 @@
 # Queued Weather Demo (Laravel)
 
-This is a Laravel app built for a technical interview assignment to demonstrate **agentic coding practices** and **background job processing** using **Laravel Queues**.
-
-Users submit a city/location, the app stores the request, then a queued job fetches (or simulates) weather data asynchronously and persists the result.
+A **weather-request web app**: you enter a city name, submit, and the app fetches (or simulates) weather data in the background and shows you the result—temperature, condition, and stored JSON. It’s built with Laravel to demonstrate **agentic coding practices** and **meaningful background job processing** (queued jobs, status tracking, separation of concerns). The application uses simulated data by default; real API support is available when `WEATHER_API_KEY` is set. This repo was created for a technical interview assignment.
 
 ## What this app demonstrates
 
