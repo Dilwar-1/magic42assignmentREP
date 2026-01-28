@@ -138,3 +138,11 @@ This repo intentionally does **not** include:
 - runtime files under `storage/`
 
 Reviewers can recreate everything with the setup steps above.
+
+## Future improvements (ideas)
+
+Some things that didn’t make it into this version but would be natural next steps:
+
+- **API first, simulated fallback**: flip the default so the app uses the real API when an API key is present, and only falls back to simulated data when the API is unavailable or not configured.
+- **Richer weather data**: surface more fields from the API (humidity, wind, feels-like, icons) and improve the formatting/presentation in the UI.
+- **Live status updates**: use polling or websockets so the status page updates automatically as jobs complete instead of requiring manual refresh.
